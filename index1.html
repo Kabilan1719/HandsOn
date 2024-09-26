@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neo4j Highcharts Network Graph</title>
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="https://code.highcharts.com/modules/networkgraph.js"></script>
+  <script src="https://code.highcharts.com/modules/exporting.js"></script>
+  <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+</head>
+<body>
+  <figure class="highcharts-figure">
+    <div id="container"></div>
+  </figure>
+
+  <script>
+    // Fetch data from the Node.js server
+    async function fetchNetworkData() {
+      try {
+        const response = await fetch('http://localhost:3000/getNetworkData');
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        return [];
+      }
+    }
+
+    // Initialize the chart after fetching the data
+    async function initChart() {
+      const networkData = await fetchNetworkData();
+
+      // Prepare data in Highcharts format
+      const highchartsData = networkData.map(item => ({
+        from: item.from,
+        to: item.to,
+        label: { // Optional - Display node labels with skills
+          formatter: function() {
+            return this.from + ' (' + this.fromSkills.join(', ') + ')';
+          }
+        }
+      }));
+
+      Highcharts.chart('container', {
+        chart: {
+          type: 'networkgraph',
+          height: '100%'
+        },
+        title: {
+          text: 'Neo4j Network Graph'
+        },
+        plotOptions: {
+          networkgraph: {
+            keys: ['from', 'to'],
+            layoutAlgorithm: {
+              enableSimulation: true,
+              friction: -0.9
+            }
+          }
+        },
+        series: [{
+          dataLabels: {
+            enabled: true,
+            linkFormat: '',
+            style: {
+              fontSize: '0.8em',
+              fontWeight: 'normal'
+            }
+          },
+          data: highchartsData
+        }]
+      });
+    }
+
+    // Call the init function
+    initChart();
+  </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Search</title>
+</head>
+<body>
+    <h1>Search Candidates</h1>
+    <input type="text" id="searchInput" placeholder="Enter skills...">
+    <button id="searchButton">Search</button>
+    <div id="results"></div>
+
+    <script>
+        document.getElementById("searchButton").onclick = function() {
+            const query = document.getElementById("searchInput").value;
+            fetch(`/search?query=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsDiv = document.getElementById("results");
+                    resultsDiv.innerHTML = "<h2>Results:</h2>";
+                    data.forEach(candidate => {
+                        resultsDiv.innerHTML += `<p>${candidate.Name} (${candidate.Email}) - Skills: ${candidate.Skills}</p>`;
+                    });
+                })
+                .catch(error => console.error("Error fetching data:", error));
+        };
+    </script>
+</body>
+</html>
